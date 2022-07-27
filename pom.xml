@@ -9,7 +9,7 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Java 11 Application</name>
+  <name>Java 17 Application</name>
   <inceptionYear>2020</inceptionYear>
   <organization>
     <name>Organization Name</name>
@@ -22,6 +22,13 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
+
+  <scm>
+    <url>git@github.com:Koziolek/maven-release-example.git</url>
+    <connection>scm:git:git@github.com:Koziolek/maven-release-example.git</connection>
+    <developerConnection>scm:git:git@github.com:Koziolek/maven-release-example.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
 
   <dependencies>
     <!-- Test Dependencies -->
@@ -66,7 +73,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.8.0</version>
+          <version>3.10.1</version>
         </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
@@ -82,7 +89,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.8.2</version>
+          <version>3.0.0-M2</version>
         </plugin>
         <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
         <plugin>
@@ -96,12 +103,25 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <!-- Release plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.0-M6</version>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <updateWorkingCopyVersions>false</updateWorkingCopyVersions>
+          <updateBranchVersions>true</updateBranchVersions>
+          <branchName>development</branchName>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.10.1</version>
         <configuration>
-          <release>11</release>
+          <release>17</release>
         </configuration>
       </plugin>
       <plugin>
