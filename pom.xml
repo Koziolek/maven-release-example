@@ -23,6 +23,39 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
 
+  <distributionManagement>
+    <snapshotRepository>
+      <id>nexus</id>
+      <name>Snapshot repository</name>
+      <url>http://localhost:18081/repository/maven-snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>nexus</id>
+      <name>Release repository</name>
+      <url>http://localhost:18081/repository/maven-releases/</url>
+    </repository>
+  </distributionManagement>
+  <repositories>
+    <repository>
+      <id>nexus-snapshots</id>
+      <url>http://localhost:18081/repository/maven-snapshots/</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>always</updatePolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>nexus-releases</id>
+      <url>http://localhost:18081/repository/maven-releases/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+        <checksumPolicy>warn</checksumPolicy>
+      </releases>
+    </repository>
+  </repositories>
   <scm>
     <url>git@github.com:Koziolek/maven-release-example.git</url>
     <connection>scm:git:git@github.com:Koziolek/maven-release-example.git</connection>
