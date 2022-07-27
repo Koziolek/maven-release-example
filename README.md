@@ -1,6 +1,6 @@
 # README
 
-Java 11 base application.
+Java 17 base application.
 
 ## BASE SETUP
 
