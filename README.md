@@ -4,6 +4,8 @@ Java 17 base application.
 
 ## BASE SETUP
 
+experimental project
+
 ### Dependencies
 
 * Junit 5
