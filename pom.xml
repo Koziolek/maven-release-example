@@ -4,7 +4,7 @@
 
   <groupId>pl.koziolekweb</groupId>
   <artifactId>example-release</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>Java 17 Application</name>
@@ -25,18 +25,18 @@
     <snapshotRepository>
       <id>nexus</id>
       <name>Snapshot repository</name>
-      <url>http://localhost:18081/repository/maven-snapshots/</url>
+      <url>http://nexus:8081/repository/maven-snapshots/</url>
     </snapshotRepository>
     <repository>
       <id>nexus</id>
       <name>Release repository</name>
-      <url>http://localhost:18081/repository/maven-releases/</url>
+      <url>http://nexus:8081/repository/maven-releases/</url>
     </repository>
   </distributionManagement>
   <repositories>
     <repository>
       <id>nexus-snapshots</id>
-      <url>http://localhost:18081/repository/maven-snapshots/</url>
+      <url>http://nexus:8081/repository/maven-snapshots/</url>
       <snapshots>
         <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
@@ -44,7 +44,7 @@
     </repository>
     <repository>
       <id>nexus-releases</id>
-      <url>http://localhost:18081/repository/maven-releases/</url>
+      <url>http://nexus:8081/repository/maven-releases/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
