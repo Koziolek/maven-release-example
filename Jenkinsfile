@@ -1,4 +1,5 @@
 def version = ""
+def versionPattern = ~/v\d*\.\d*.\d*/
 
 pipeline{
     agent any
@@ -17,6 +18,7 @@ pipeline{
                     properties([
                         parameters([
                             string(defaultValue: '', name: 'new_version'),
+                            string(defaultValue: 'git@github.com:Koziolek/maven-release-example.git', name: 'repository_url'),
                             string(defaultValue: 'development', name: 'dev_branch'),
                             string(defaultValue: 'master', name: 'master_branch'),
                             string(defaultValue: 'release/', name: 'release_branch')
@@ -48,21 +50,54 @@ pipeline{
                 }
             }
         }
+        stage("Calculate version"){
+            parallel{
+                stage("Use default version"){
+                    when{
+                        expression{
+                            params.new_version == ''
+                        }
+                    }
+                    steps{
+                        sshagent(credentials: ["jenkins-priv", "nexus"]) {
+                            withMaven(maven: "maven", mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
+                                sh "mvn -B -V release:prepare -DskipTests"
+                                script{
+                                    def releaseProperties = readProperties  file: './release.properties'
+                                    version = releaseProperties["scm.tag"]
+                                    echo version
+                                }
+                                sh "mvn -B -V release:rollback"
+                            }
+                        }
+                    }
+                }
+                stage("Use version from params"){
+                    when{
+                        expression{
+                            params.new_version != ''
+                        }
+                    }
+                    steps{
+                        version = params.new_version
+                    }
+                }
+            }
+        }
+        stage("Validate version"){
+            when{
+                expression{
+                    ! versionPattern.matcher(version).match()
+                }
+                steps{
+                    error("Version format does not match")
+                }
+            }
+        }
         stage("Release"){
             steps{
-                cleanWs()
-                git branch: 'development', url: 'git@github.com:Koziolek/maven-release-example.git', credentialsId: "jenkins-priv"
-                sh 'git config user.name koziolek'
-                sh 'git config user.email bjkuczynski@gmail.com'
                 sshagent(credentials: ["jenkins-priv", "nexus"]) {
                     withMaven(maven: "maven", mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
-                        sh "mvn -B -V release:prepare -DskipTests"
-                        script{
-                            def releaseProperties = readProperties  file: './release.properties'
-                            version = releaseProperties["scm.tag"]
-                            echo version
-                        }
-                        sh "mvn -B -V release:rollback"
                         sh """
                             git checkout -b release/${version}
                             mvn -B -V release:prepare release:perform -DskipTests
