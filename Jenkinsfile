@@ -37,7 +37,7 @@ pipeline{
         }
         stage("Compile and test"){
             steps{
-                git branch: params.dev_branch, url: params.repository_url, credentialsId: "jenkins-priv"
+                git branch: dev_branch, url: repository_url, credentialsId: "jenkins-priv"
                 sh 'git config user.name koziolek'
                 sh 'git config user.email bjkuczynski@gmail.com'
                 sshagent(credentials: ["jenkins-priv", "nexus"]) {
@@ -118,17 +118,17 @@ pipeline{
                 sshagent(credentials: ["jenkins-priv", "nexus"]) {
                     withMaven(mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
                         sh """
-                            git checkout -b ${props.release_branch}/${version}
+                            git checkout -b ${params.release_branch}/${version}
                             mvn -B -V release:prepare release:perform -DskipTests
-                            git checkout ${props.dev_branch}
-                            git merge --no-ff ${props.release_branch}/${version}
-                            git push --set-upstream origin ${props.dev_branch}
-                            git checkout ${props.release_branch}/${version}
+                            git checkout ${params.dev_branch}
+                            git merge --no-ff ${params.release_branch}/${version}
+                            git push --set-upstream origin ${params.dev_branch}
+                            git checkout ${params.release_branch}/${version}
                             git reset --hard HEAD~1
-                            git push --force origin ${props.release_branch}/${version}
-                            git checkout ${props.master_branch}
-                            git merge --no-ff ${props.release_branch}/${version}
-                            git push --set-upstream origin ${props.master_branch}
+                            git push --force origin ${params.release_branch}/${version}
+                            git checkout ${params.master_branch}
+                            git merge --no-ff ${params.release_branch}/${version}
+                            git push --set-upstream origin ${params.master_branch}
                         """
                     }
                 }
@@ -137,11 +137,11 @@ pipeline{
         stage("cleanup"){
             when{
                 expression{
-                    props.remove_release_branch
+                    params.remove_release_branch
                 }
             }
             steps{
-                sh "git branch -d ${props.release_branch}/${version}"
+                sh "git branch -d ${params.release_branch}/${version}"
             }
         }
     }
@@ -151,7 +151,7 @@ pipeline{
                 withMaven(mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
                     sh """
                         mvn -B -V release:rollback
-                        bash -c  '[[ ! -z  `git branch -a | grep ${props.release_branch}/${version}` ]] && git push --delete origin ${props.release_branch}/${version} '
+                        bash -c  '[[ ! -z  `git branch -a | grep ${params.release_branch}/${version}` ]] && git push --delete origin ${params.release_branch}/${version} '
                     """
                 }
             }
