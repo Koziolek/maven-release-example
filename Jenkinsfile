@@ -23,7 +23,7 @@ pipeline{
                             string(defaultValue: 'git@github.com:Koziolek/maven-release-example.git', name: 'repository_url'),
                             string(defaultValue: 'development', name: 'dev_branch'),
                             string(defaultValue: 'master', name: 'master_branch'),
-                            string(defaultValue: 'release', name: 'release_branch')
+                            string(defaultValue: 'release', name: 'release_branch'),
                             booleanParam(defaultValue: false, name: 'remove_release_branch')
                         ])
                     ])
