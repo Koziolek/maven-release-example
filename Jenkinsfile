@@ -10,7 +10,7 @@ pipeline{
 
     tools {
       jdk 'jdk-17'
-      maven 'maven'
+      maven maven_version
     }
 
     stages{
@@ -24,6 +24,7 @@ pipeline{
                             string(defaultValue: 'development', name: 'dev_branch'),
                             string(defaultValue: 'master', name: 'master_branch'),
                             string(defaultValue: 'release', name: 'release_branch'),
+                            string(defaultValue: 'maven', name: 'maven_version'),
                             booleanParam(defaultValue: false, name: 'remove_release_branch')
                         ])
                     ])
