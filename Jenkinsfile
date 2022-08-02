@@ -79,7 +79,9 @@ pipeline{
                         }
                     }
                     steps{
-                        version = params.new_version
+                        script{
+                            version = params.new_version
+                        }
                     }
                 }
             }
