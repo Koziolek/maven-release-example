@@ -1,5 +1,6 @@
 def version = ""
 def versionPattern = ~/v\d*\.\d*.\d*/
+def user = env.BUILD_USER_ID
 
 pipeline{
     agent any
@@ -24,10 +25,6 @@ pipeline{
                             string(defaultValue: 'release/', name: 'release_branch')
                         ])
                     ])
-                }
-                script{
-                    echo params.dev_branch
-                    echo params.new_version
                 }
             }
         }
@@ -89,11 +86,26 @@ pipeline{
         stage("Validate version"){
             when{
                 expression{
-                    ! versionPattern.matcher(version).match()
+                    ! (version ==~ versionPattern)
                 }
             }
             steps{
                 error("Version format does not match")
+            }
+        }
+        stage("Pre-release summary"){
+            steps{
+                script{
+                    echo """
+                        ***************************************
+                                Performing release!
+                        ***************************************
+                        Project: ${repository_url}
+                        Version: ${version}
+
+                        Started by: ${user}
+                    """
+                }
             }
         }
         stage("Release"){
