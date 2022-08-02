@@ -10,6 +10,7 @@ pipeline{
 
     tools {
       jdk 'jdk-17'
+      maven 'maven'
     }
 
     stages{
@@ -22,7 +23,8 @@ pipeline{
                             string(defaultValue: 'git@github.com:Koziolek/maven-release-example.git', name: 'repository_url'),
                             string(defaultValue: 'development', name: 'dev_branch'),
                             string(defaultValue: 'master', name: 'master_branch'),
-                            string(defaultValue: 'release/', name: 'release_branch')
+                            string(defaultValue: 'release', name: 'release_branch'),
+                            booleanParam(defaultValue: false, name: 'remove_release_branch')
                         ])
                     ])
                 }
@@ -35,11 +37,11 @@ pipeline{
         }
         stage("Compile and test"){
             steps{
-                git branch: 'development', url: 'git@github.com:Koziolek/maven-release-example.git', credentialsId: "jenkins-priv"
+                git branch: dev_branch, url: repository_url, credentialsId: "jenkins-priv"
                 sh 'git config user.name koziolek'
                 sh 'git config user.email bjkuczynski@gmail.com'
                 sshagent(credentials: ["jenkins-priv", "nexus"]) {
-                    withMaven(maven: "maven", mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
+                    withMaven(mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
                         sh """
                             mvn -V -U verify
                         """
@@ -57,14 +59,14 @@ pipeline{
                     }
                     steps{
                         sshagent(credentials: ["jenkins-priv", "nexus"]) {
-                            withMaven(maven: "maven", mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
-                                sh "mvn -B -V release:prepare -DskipTests"
+                            withMaven(mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
+                                sh "mvn -B -q release:prepare -DskipTests"
                                 script{
                                     def releaseProperties = readProperties  file: './release.properties'
                                     version = releaseProperties["scm.tag"]
                                     echo version
                                 }
-                                sh "mvn -B -V release:rollback"
+                                sh "mvn -B -q release:rollback -DskipTests"
                             }
                         }
                     }
@@ -90,7 +92,10 @@ pipeline{
                 }
             }
             steps{
-                error("Version format does not match")
+                error("""
+                    Version format does not match!
+                    Expected format is /${versionPattern}/, but given value is '${version}'
+                """)
             }
         }
         stage("Pre-release summary"){
@@ -111,34 +116,42 @@ pipeline{
         stage("Release"){
             steps{
                 sshagent(credentials: ["jenkins-priv", "nexus"]) {
-                    withMaven(maven: "maven", mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
+                    withMaven(mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
                         sh """
-                            git checkout -b release/${version}
+                            git checkout -b ${params.release_branch}/${version}
                             mvn -B -V release:prepare release:perform -DskipTests
-                            git checkout development
-                            git merge --no-ff release/${version}
-                            git push --set-upstream origin development
-                            git checkout release/${version}
+                            git checkout ${params.dev_branch}
+                            git merge --no-ff ${params.release_branch}/${version}
+                            git push --set-upstream origin ${params.dev_branch}
+                            git checkout ${params.release_branch}/${version}
                             git reset --hard HEAD~1
-                            git push --force origin release/${version}
-                            git checkout development
-                            git checkout master
-                            git merge --no-ff release/${version}
-                            git push --set-upstream origin master
-                            git branch -d release/${version}
+                            git push --force origin ${params.release_branch}/${version}
+                            git checkout ${params.master_branch}
+                            git merge --no-ff ${params.release_branch}/${version}
+                            git push --set-upstream origin ${params.master_branch}
                         """
                     }
                 }
             }
         }
+        stage("cleanup"){
+            when{
+                expression{
+                    params.remove_release_branch
+                }
+            }
+            steps{
+                sh "git branch -d ${params.release_branch}/${version}"
+            }
+        }
     }
     post {
-        failure {
+        failure { // TODO: this cleanup need parametrization
             sshagent(credentials: ["jenkins-priv"]) {
-                withMaven(maven: "maven", mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
+                withMaven(mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
                     sh """
                         mvn -B -V release:rollback
-                        bash -c  '[[ ! -z  `git branch -a | grep release/${version}` ]] && git push --delete origin release/${version} '
+                        bash -c  '[[ ! -z  `git branch -a | grep ${params.release_branch}/${version}` ]] && git push --delete origin ${params.release_branch}/${version} '
                     """
                 }
             }
