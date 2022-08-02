@@ -29,7 +29,7 @@ pipeline{
                 }
             }
         }
-        state("Prepare Workspace"){
+        stage("Prepare Workspace"){
             steps{
                 cleanWs() // clean workspace
             }
