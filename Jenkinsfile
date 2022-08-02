@@ -91,9 +91,9 @@ pipeline{
                 expression{
                     ! versionPattern.matcher(version).match()
                 }
-                steps{
-                    error("Version format does not match")
-                }
+            }
+            steps{
+                error("Version format does not match")
             }
         }
         stage("Release"){
