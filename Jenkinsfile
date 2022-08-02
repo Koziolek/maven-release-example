@@ -10,7 +10,7 @@ pipeline{
 
     tools {
       jdk 'jdk-17'
-      maven maven_version
+      maven 'maven'
     }
 
     stages{
@@ -24,7 +24,7 @@ pipeline{
                             string(defaultValue: 'development', name: 'dev_branch'),
                             string(defaultValue: 'master', name: 'master_branch'),
                             string(defaultValue: 'release', name: 'release_branch'),
-                            string(defaultValue: 'maven', name: 'maven_version'),
+                            string(defaultValue: 'jenkins-priv', name: 'git_credentials'),
                             booleanParam(defaultValue: false, name: 'remove_release_branch')
                         ])
                     ])
@@ -38,7 +38,7 @@ pipeline{
         }
         stage("Compile and test"){
             steps{
-                git branch: dev_branch, url: repository_url, credentialsId: "jenkins-priv"
+                git branch: dev_branch, url: repository_url, credentialsId: git_credentials
                 sh 'git config user.name koziolek'
                 sh 'git config user.email bjkuczynski@gmail.com'
                 sshagent(credentials: ["jenkins-priv", "nexus"]) {
