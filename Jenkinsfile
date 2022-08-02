@@ -37,7 +37,7 @@ pipeline{
         }
         stage("Compile and test"){
             steps{
-                git branch: props.dev_branch, url: props.repository_url, credentialsId: "jenkins-priv"
+                git branch: "${props.dev_branch}", url: "${props.repository_url}", credentialsId: "jenkins-priv"
                 sh 'git config user.name koziolek'
                 sh 'git config user.email bjkuczynski@gmail.com'
                 sshagent(credentials: ["jenkins-priv", "nexus"]) {
