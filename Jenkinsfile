@@ -58,13 +58,13 @@ pipeline{
                     steps{
                         sshagent(credentials: ["jenkins-priv", "nexus"]) {
                             withMaven(maven: "maven", mavenSettingsConfig: "3df3ff2d-fe3b-4539-8ed8-84f09f411b0f" ) {
-                                sh "mvn -B -V release:prepare -DskipTests"
+                                sh "mvn -B -q release:prepare -DskipTests"
                                 script{
                                     def releaseProperties = readProperties  file: './release.properties'
                                     version = releaseProperties["scm.tag"]
                                     echo version
                                 }
-                                sh "mvn -B -V release:rollback"
+                                sh "mvn -B -q release:rollback -DskipTests"
                             }
                         }
                     }
@@ -90,7 +90,10 @@ pipeline{
                 }
             }
             steps{
-                error("Version format does not match")
+                error("""
+                    Version format does not match!
+                    Expected format is ${versionPattern}, but given value is ${version}
+                """)
             }
         }
         stage("Pre-release summary"){
