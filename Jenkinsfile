@@ -2,6 +2,10 @@ def version = ""
 def versionPattern = ~/v\d*\.\d*.\d*/
 def user = env.BUILD_USER_ID
 
+node(){
+    parameterValue = params.remove_release_branch ?: false
+}
+
 pipeline{
     agent any
     options {
@@ -25,7 +29,7 @@ pipeline{
                             string(defaultValue: 'master', name: 'master_branch'),
                             string(defaultValue: 'release', name: 'release_branch'),
                             string(defaultValue: 'jenkins-priv', name: 'git_credentials'),
-                            booleanParam(defaultValue: false, name: 'remove_release_branch')
+                            booleanParam(defaultValue: parameterValue, name: 'remove_release_branch')
                         ])
                     ])
                 }
@@ -38,7 +42,7 @@ pipeline{
         }
         stage("Compile and test"){
             steps{
-                git branch: dev_branch, url: repository_url, credentialsId: git_credentials
+                git branch: params.dev_branch, url: params.repository_url, credentialsId: params.git_credentials
                 sh 'git config user.name koziolek'
                 sh 'git config user.email bjkuczynski@gmail.com'
                 sshagent(credentials: ["jenkins-priv", "nexus"]) {
