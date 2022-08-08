@@ -4,7 +4,7 @@
 
   <groupId>pl.koziolekweb</groupId>
   <artifactId>example-release</artifactId>
-  <version>1.0.16-SNAPSHOT</version>
+  <version>1.0.16</version>
   <packaging>jar</packaging>
 
   <name>Java 17 Application</name>
@@ -58,7 +58,7 @@
     <url>git@github.com:Koziolek/maven-release-example.git</url>
     <connection>scm:git:git@github.com:Koziolek/maven-release-example.git</connection>
     <developerConnection>scm:git:git@github.com:Koziolek/maven-release-example.git</developerConnection>
-    <tag>v1.0.0</tag>
+    <tag>v1.0.16</tag>
   </scm>
 
   <dependencies>
