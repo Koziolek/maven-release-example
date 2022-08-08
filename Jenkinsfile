@@ -18,6 +18,16 @@ pipeline{
     }
 
     stages{
+        stage("Log params"){
+            script{
+                echo """
+                ***************
+                    ${parameterValue}
+                ***************
+                """
+            }
+        }
+
         stage("Prepare Parameters"){
             steps{
                 script{
